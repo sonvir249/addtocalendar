@@ -81,4 +81,3 @@ This project has been sponsored by:
   QED42 is a web development agency focussed on helping organisations and
   individuals reach their potential, most of our work is in the space of
   publishing, e-commerce, social and enterprise.
-# addtocalendar

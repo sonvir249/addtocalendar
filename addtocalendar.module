@@ -135,6 +135,7 @@ function addtocalendar_field_widget_settings_form($field, $instance) {
       'atc_date_start' => t('Start date'),
       'atc_date_end' => t('End date'),
     );
+
     foreach ($info as $id => $label) {
       $element['addtocalendar_settings'][$id]['field'] = array(
         '#type' => 'select',
@@ -144,17 +145,10 @@ function addtocalendar_field_widget_settings_form($field, $instance) {
         '#default_value' => !empty($instance['widget']['settings']['addtocalendar_settings'][$id]['field']) ? $instance['widget']['settings']['addtocalendar_settings'][$id]['field'] : '',
       );
 
-      if ($id == 'atc_date_start' || $id == 'atc_date_end') {
-        $default_value = date('Y-m-d H:i:s', time());
-      }
-      else{
-        $default_value = $label;
-      }
-
       $element['addtocalendar_settings'][$id]['tokenized'] = array(
         '#type' => 'textfield',
         '#title' => check_plain($label . ': Static/Tokenized Content'),
-        '#default_value' => !empty($instance['widget']['settings']['addtocalendar_settings'][$id]['tokenized']) ? $instance['widget']['settings']['addtocalendar_settings'][$id]['tokenized'] : $default_value,
+        '#default_value' => !empty($instance['widget']['settings']['addtocalendar_settings'][$id]['tokenized']) ? $instance['widget']['settings']['addtocalendar_settings'][$id]['tokenized'] : '',
         '#description' => 'Select field to be used as ' . $label . ' for calendar events'
       );
     }
@@ -271,8 +265,13 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
             $class_value = isset($entity->{$settings[$value]['field']}[LANGUAGE_NONE][0]['value']) ? $entity->{$settings[$value]['field']}[LANGUAGE_NONE][0]['value'] : '';
           }
 
+          $settings[$value]['tokenized'] = !empty($settings[$value]['tokenized']) ? $settings[$value]['tokenized'] : date('Y-m-d h:i:s', time());
+
           if ($value == 'atc_date_start' || $value == 'atc_date_end') {
             $class_value = convert_time_to_Local($settings[$value]['tokenized'], $timezone);
+            if ($settings[$value]['field'] == 'field_date') {
+              $class_value = $entity->{$settings[$value]['field']}[LANGUAGE_NONE][0]['value'];
+            }
           }
 
           $build['addtocalendar'][$value] = array(

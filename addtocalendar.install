@@ -8,7 +8,7 @@
 * Implement hook_field_schema().
 */
 function addtocalendar_field_schema($field) {
-    $columns = array (
+    $columns = array(
          'display_addtocalendar' => array(
              'type' => 'int',
              'size' => 'tiny',
