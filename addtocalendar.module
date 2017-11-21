@@ -146,7 +146,8 @@ function addtocalendar_field_widget_settings_form($field, $instance) {
 
       if ($id == 'atc_date_start' || $id == 'atc_date_end') {
         $default_value = date('Y-m-d H:i:s', time());
-      } else {
+      }
+      else{
         $default_value = $label;
       }
 
@@ -236,8 +237,7 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
   $settings = $instance['widget']['settings']['addtocalendar_settings'];
   if ($display['type'] == 'addtocalendar_formatter') {
     if (isset($items[0])) {
-      $timezone = date_default_timezone_get();
-      $date = date('Y-m-d h:i:s', strtotime($settings['atc_date_start']['tokenized']));
+      $timezone = variable_get('date_default_timezone', '');
       $button_text = $instance['widget']['settings']['addtocalendar_display_text'];
       foreach ($items as $delta => $item) {
         $build['addtocalendar_button_text'] = array(
@@ -247,14 +247,6 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
           '#attributes' => array(
             'class' => 'atcb-link'
           )
-        );
-        $build['addtocalendar']['atc_date_start'] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'var',
-          '#value' => $date,
-          '#attributes' => array(
-            'class' => 'atc_date_start',
-          ),
         );
 
         $info = array(
@@ -266,19 +258,21 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
           'atc_date_end',
         );
 
+
         foreach ($info as $value) {
-          switch ($settings[$value]['field']) {
-            case 'token':
-              $class_value = $settings[$value]['tokenized'];
-              break;
+          $class_value = $value;
+          if ($settings[$value]['field'] == 'token') {
+            $class_value = $settings[$value]['tokenized'];
+          }
+          elseif ($settings[$value]['field'] == 'title') {
+            $class_value = entity_label($entity_type, $entity);
+          }
+          elseif (isset($entity->{$settings[$value]['field']})) {
+            $class_value = isset($entity->{$settings[$value]['field']}[LANGUAGE_NONE][0]['value']) ? $entity->{$settings[$value]['field']}[LANGUAGE_NONE][0]['value'] : '';
+          }
 
-            case 'title':
-              $class_value = entity_label($entity_type, $entity);
-              break;
-
-            default:
-              $class_value = $value;
-              break;
+          if ($value == 'atc_date_start' || $value == 'atc_date_end') {
+            $class_value = convert_time_to_Local($settings[$value]['tokenized'], $timezone);
           }
 
           $build['addtocalendar'][$value] = array(
@@ -321,7 +315,7 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
         $build['addtocalendar'] = array(
           '#type' => 'html_tag',
           '#tag' => 'span',
-          '#value' => '<var class="atc_event">' . render($build['addtocalendar']) . '</var>',
+          '#value' => render($build['addtocalendar_button_text']) . '<var class="atc_event">' . render($build['addtocalendar']) . '</var>',
           '#attributes' => array(
             'class' => array(
               'addtocalendar',
@@ -366,7 +360,8 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
         }
         $element[]['#markup'] = render($build['addtocalendar']);
       }
-    } else {
+    }
+    else{
       $element = array(
         '#prefix' => '<div class="wrapper">',
         '#suffix' => '<div>' . $instance['widget']['settings']['addtocalendar_disable_text'] . '</div></div>',
@@ -375,3 +370,13 @@ function addtocalendar_field_formatter_view($entity_type, $entity, $field, $inst
   }
   return $element;
 };
+
+/*
+ * Get local time
+ */
+function convert_time_to_Local($datetime, $timezone) {
+  $given = new DateTime($datetime, new DateTimeZone("Asia/Kolkata"));
+  $given->setTimezone(new DateTimeZone($timezone));
+  $output = $given->format("Y-m-d h:i:s"); //can change as per your requirement
+  return $output;
+}
