@@ -1,0 +1,27 @@
+ <?php
+
+/**
+ * @file
+ */
+
+/**
+* Implement hook_field_schema().
+*/
+function addtocalendar_field_schema($field) {
+    $columns = array (
+         'display_addtocalendar' => array(
+             'type' => 'int',
+             'size' => 'tiny',
+             'not null' => FALSE
+         )
+    );
+
+    $indexes = array(
+        'display_addtocalendar' => array('display_addtocalendar'),
+    );
+
+    return array(
+        'columns' => $columns,
+        'indexes' => $indexes,
+    );
+}
